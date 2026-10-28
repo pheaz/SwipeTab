@@ -1,0 +1,26 @@
+name: Validate PR title
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+permissions:
+  contents: read
+
+jobs:
+  validate-pr-title:
+    name: validate-pr-title
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR title
+        shell: bash
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          TITLE_PATTERN='^(feat|fix|docs|chore|refactor|perf|test|ci|build|revert)(\([^)]+\))?!?:[[:space:]]+.+$'
+          if [[ "$PR_TITLE" =~ $TITLE_PATTERN ]]; then
+            printf 'Valid PR title\n'
+          else
+            printf 'Expected conventional PR title, e.g. docs: add issue templates\n' >&2
+            false
+          fi
